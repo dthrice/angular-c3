@@ -1,19 +1,20 @@
-var chartIdCounter = Math.floor((Math.random()*1000)+1);
-angular.module( 'c3', [])
-    .directive( 'chart', function() {
+var chartIdCounter = Math.floor((Math.random() * 1000) + 1);
+angular.module('c3', [])
+    .directive('chart', function () {
+        "use strict";
         return {
-            restrict: 'A',
+            restrict: 'EA',
             scope: {
                 data: '=',
-                options: '='
+                options: '=',
+                type: '='
             },
-            link: function(scope, element, attrs) {
+            link: function (scope, element, attrs) {
                 //Assigning id to the element
                 var chartId;
-                if(element.attr('id')) {
+                if (element.attr('id')) {
                     chartId = element.attr('id');
-                }
-                else {
+                } else {
                     chartId = 'c3-chart-' + chartIdCounter;
                     element.attr('id', chartId);
                     chartIdCounter += 1;
@@ -24,21 +25,18 @@ angular.module( 'c3', [])
                     bindto: '#' + chartId,
                     data: scope.data
                 };
-                genData.data.type = attrs.chart? attrs.chart : scope.data.type? scope.data.type : 'line';
-                if(scope.options) {
-                    Object.keys(scope.options).forEach(function(key) {
+                genData.data.type = attrs.chart ? attrs.chart : scope.data.type ? scope.data.type : 'line';
+                if (scope.options) {
+                    Object.keys(scope.options).forEach(function (key) {
                         genData[key] = scope.options[key];
                     });
                 }
 
                 //On data change, reload chart
-                onDataChanged = function(data, oldData) {
-                    if(chart) {
+                var onDataChanged = function (data, oldData) {
+                    if (chart) {
                         chart.load(data);
-                        console.log(data.columns.length);
-                        console.log(oldData.columns.length);
-                        if(data.columns.length < oldData.columns.length) {
-                            console.log('data' + oldData.columns.length);
+                        if (data.columns.length < oldData.columns.length) {
                             chart.unload(['data' + oldData.columns.length]);
                         }
                     }
@@ -46,13 +44,16 @@ angular.module( 'c3', [])
                 scope.$watch('data', onDataChanged, true);
 
                 //On chart type change, reload chart
-                onChartChanged = function(chart) {
-                    if(chart) {
-                        scope.data.type = chart;
-                        chart.load(data);
+                var onTypeChanged = function (type) {
+                    if (chart) {
+                        scope.data.type = type;
+                        chart.load(scope.data);
                     }
                 };
-                scope.$watch(function() {return attrs.chart; }, onChartChanged);
+
+                scope.$watch(function () {
+                    return scope.type;
+                }, onTypeChanged);
 
                 //Generating the chart
                 var chart = c3.generate(genData);
