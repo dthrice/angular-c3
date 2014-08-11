@@ -9,6 +9,8 @@ angular.module('c3', [])
                 options: '=',
                 type: '='
             },
+            replace: true,
+            template: '<div></div>',
             link: function (scope, element, attrs) {
                 //Assigning id to the element
                 var chartId;
